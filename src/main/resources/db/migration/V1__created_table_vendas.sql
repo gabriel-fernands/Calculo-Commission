@@ -1,0 +1,5 @@
+CREATE TABLE venda (
+    id BIGSERIAL PRIMARY KEY,
+    vendedor VARCHAR(255) NOT NULL,
+    valor NUMERIC(10, 2) NOT NULL
+);

@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: comission-API
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/comission_db
+    username: comission
+    password: comission
+    driver-class-name: org.postgresql.Driver
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8081
+
+# Evita mostrar stacktrace em produção
+error:
+  include-stacktrace: never
+

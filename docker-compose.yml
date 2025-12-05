@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: comission
+    environment:
+      POSTGRES_DB: comission_db
+      POSTGRES_USER: comission
+      POSTGRES_PASSWORD: comission
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - comission-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U comission -d comission_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+networks:
+  comission-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
