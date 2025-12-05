@@ -3,84 +3,20 @@ name: CI - Comission API
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build-test:
-    name: Build, Test & Healthcheck
-    runs-on: ubuntu-latest
+            runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: comission_db
-          POSTGRES_USER: comission
-          POSTGRES_PASSWORD: comission
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U comission -d comission_db"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+            steps:
+               - uses: actions/checkout@v6.0.1
+               - name: Contrução da imagem Docker
+               - uses: docker/build-push-action@v6.18.0
+                 with: 
+                    context: ./src
+                    file: .src/Dockerfile
+                    push: true
+                    tags:
+                      gabrielfernandes/calculo-commission:v1
+                      gabrielfernandes/calculo-commission:latest
 
-    steps:
-
-      # 1️⃣ Checkout do código
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # 2️⃣ Setup JDK
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      # 3️⃣ Cache do Maven
-      - name: Cache Maven
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: m2-
-
-      # 4️⃣ Build + Testes
-      - name: Build & Test
-        run: mvn clean verify -DskipTests=false
-
-      # 5️⃣ Build da imagem Docker
-      - name: Build Docker Image
-        run: docker build -t comission-api .
-
-      # 6️⃣ Subir API em container
-      - name: Run API Container
-        run: |
-          docker run -d --name comission-api \
-            -p 8081:8081 \
-            --env SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/comission_db \
-            --env SPRING_DATASOURCE_USERNAME=comission \
-            --env SPRING_DATASOURCE_PASSWORD=comission \
-            --network host \
-            comission-api
-
-      # 7️⃣ Esperar a API subir
-      - name: Wait Spring Boot to start
-        run: sleep 20
-
-      # 8️⃣ Health check
-      - name: Health Check
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health)
-          if [ "$STATUS" -ne 200 ]; then
-            echo "API is not healthy! Status code: $STATUS"
-            exit 1
-          fi
-          echo "API is healthy ✔️"
-
-      # 9️⃣ Logs para troubleshooting
-      - name: Show API Logs
-        if: failure()
-        run: docker logs comission-api
