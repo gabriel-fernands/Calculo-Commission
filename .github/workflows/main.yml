@@ -6,17 +6,18 @@ on:
 
 jobs:
   build-test:
-            runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-            steps:
-               - uses: actions/checkout@v6.0.1
-               - name: Contrução da imagem Docker
-               - uses: docker/build-push-action@v6.18.0
-                 with: 
-                    context: ./src
-                    file: .src/Dockerfile
-                    push: true
-                    tags:
-                      gabrielfernandes/calculo-commission:v1
-                      gabrielfernandes/calculo-commission:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      - name: Construção e push da imagem Docker
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src
+          file: ./Dockerfile
+          push: true
+          tags: |
+            gabrielfernandes/calculo-commission:v1
+            gabrielfernandes/calculo-commission:latest
